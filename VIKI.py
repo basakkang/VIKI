@@ -10,4 +10,13 @@ class VIKI:
 		return self.__cerebro.getTestingResult()
 
 	def analyzeCerebro(self):
-		pass
+		result = self.getTestResultCerebro()
+		feed = Feed(start_date, end_date)
+		# feed.addDailyFeed(df, instrument)
+		# add all daily feed
+		alphaman = Alphaman(start_date, end_date)
+		alphaman.setFeed(feed)
+		alphaman.setStrategy(VikiStrategy(self.__cerebro.instruments))
+		alphaman.run()
+		alphaman.show()
+
