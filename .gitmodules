@@ -1,0 +1,3 @@
+[submodule "Alphaman"]
+	path = Alphaman
+	url = https://github.com/Changsung/Alphaman.git
