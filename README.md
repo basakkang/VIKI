@@ -11,3 +11,5 @@ pip install -r requirements.txt
 ```
 pip freeze > requirements.txt
 ```
+
+![alt tag](https://github.com/Changsung/StockPrediction_RNN/blob/master/result.png?raw=true)
