@@ -7,6 +7,7 @@ class VIKI:
 		self.__cerebro.run()
 
 	def getTestResultCerebro(self):
-		return self.__cerebro.testing()
+		return self.__cerebro.getTestingResult()
 
 	def analyzeCerebro(self):
+		pass
