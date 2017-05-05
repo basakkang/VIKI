@@ -1,5 +1,5 @@
-# StockPrediction_RNN
-The project for high rates of return in stock investment with deep learning(R
+# VIKI
+VIKI is a deep learning application for prediction stock price in KOSPI and KOSDAQ. 
 
 # init 
 ```
