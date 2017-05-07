@@ -28,24 +28,18 @@ class Cerebro:
 		pass
 
 	def makeDataSet(self, start_date, end_date):
-
-		df_total = {}
+	def makeDataSet(self, start_date, end_date):
 
 		# Scaler
 		scaler_x = MinMaxScaler(feature_range=(0, 1))
+
+		df_total = None
 				
 		for item in self.__instruments:
 
 			df = web.DataReader(item, 'yahoo', start_date, end_date)[['Open','High','Low','Close','Volume']]
-
 			# make data serialized
-			if len(df_total) == 0:
-				df_total = df
-			else:
-				df_total = pd.concat([df_total, df], axis=1)
-
-		# test
-		print df_total
+			df_total = (df, pd.concat([df_total, df], axis=1))[df_total is not None]
 
 		# make NaN 0
 		df_total = df_total.fillna(0)
