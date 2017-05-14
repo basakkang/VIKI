@@ -1,0 +1,111 @@
+from viki.cerebro import Cerebro
+from keras.models import Sequential
+from keras.layers.convolutional import Conv2D
+from keras.optimizers import SGD , Adam
+from keras.layers.core import Dense, Dropout, Activation, Flatten
+from viki.utils import getRandCompany, getCloseStartDate, strCode
+
+import pandas_datareader.data as web
+import h5py
+
+LEARNING_RATE = 1e-4
+
+class DQNCerebro(Cerebro):
+
+	def __init__(self, inst_num, input_days):
+		self._input_days = input_days
+		self._inst_num = inst_num
+		Cerebro.__init__(self)
+
+	def buildModel(self):
+		num_of_instruments = self._inst_num
+		num_of_input_factor = len(self._input_factor)
+		model = Sequential()
+		model.add(Conv2D(32, 8, 8, subsample=(4, 4), border_mode='same',input_shape=(self._inst_num, self._input_days, num_of_input_factor)))  #20 * 20 * 5
+		model.add(Activation('relu'))
+		model.add(Conv2D(64, 4, 4, subsample=(2, 2), border_mode='same'))
+		model.add(Activation('relu'))
+		model.add(Conv2D(64, 3, 3, subsample=(1, 1), border_mode='same'))
+		model.add(Activation('relu'))
+		model.add(Flatten())
+		model.add(Dense(512))
+		model.add(Activation('relu'))
+		model.add(Dense(num_of_instruments + 1))
+		adam = Adam(lr=LEARNING_RATE)
+		model.compile(loss='mse',optimizer=adam, metrics=['accuracy'])
+		return model
+
+	def train(self):
+		self.__model = self.buildModel()
+		images, labels = self.makeTrainData(self._input_days, self._inst_num, self._learning_start_date, self._learning_end_date)
+		self.__model.fit(images, labels, epochs=10, batch_size=1, verbose=2)
+		self.__model.save_weights("DQNCerebro.h5", overwrite=True)
+
+	def setInstNum(self, num):
+		self._inst_num = num
+
+	def makeTrainData(self, day, inst_num, start_date, end_date):
+		codes = self.getRandInstruments(inst_num)
+		images, prices = self.generateImages(day, codes, start_date, end_date)
+		labels = self.generateLabelWithPrices(prices)
+		return images[1::], labels
+
+	def getRandInstruments(self, inst_num):
+		return getRandCompany(inst_num)
+
+	def getCloseStartInstruments(self, codes):
+		return getCloseStartDate(codes)
+
+	def getRandPriceDatas(self, codes, start_date, end_date):
+		print codes
+		close_start_date = self.getCloseStartInstruments(codes)
+		s_date = (close_start_date, start_date)[start_date > close_start_date]
+		print s_date
+		print end_date
+		baseDataset, prices = self.makeBaseDataSet(map(lambda x:strCode(x)+".KS", codes), s_date, end_date)
+		return baseDataset, prices
+
+	def generateImages(self, days, codes, start_date, end_date):
+		images = []
+		randDatas, prices = self.getRandPriceDatas(codes, start_date, end_date)
+		for i in range(len(randDatas) - days):
+			images.append(randDatas[i: i + days])
+		return images, prices[:-days]
+
+	# def generateLabelWithImage(self, images):
+	# 	label = []
+	# 	prevPrices = map(lambda x:x[-1], images[0][-1])
+	# 	for image in images[1::]:
+	# 		priceLabel = [0] * (len(image[0]) + 1)
+	# 		curPrices = map(lambda x:x[-1], image[-1])
+	# 		diffPrices = [(curPrices[i] - prevPrices[i])/prevPrices[i] for i in range(len(curPrices))]
+	# 		max_val = max(diffPrices)
+	# 		if max_val == float('Inf'):
+	# 			max_idx = diffPrices.index(max_val)
+	# 			print prevPrices[max_idx], curPrices[max_idx]
+
+	# 		if max_val > 0 :
+	# 			max_idx = diffPrices.index(max_val)
+	# 			priceLabel[max_idx] = 1
+	# 		else:
+	# 			priceLabel[-1] = 1
+	# 		prevPrices = curPrices
+	# 		label.append(priceLabel)
+	# 	return label
+
+	def generateLabelWithPrices(self, prices):
+		label = []
+		prevPrice = prices[0]
+		for price in prices[1::]:
+			priceLabel = [0] * (len(prices[0]) + 1)
+			diffPrices = [(price[i] - prevPrice[i])/prevPrice[i] for i in range(len(price))]
+			max_val = max(diffPrices)
+			if max_val > 0 :
+				max_idx = diffPrices.index(max_val)
+				priceLabel[max_idx] = 1
+			else:
+				priceLabel[-1] = 1
+			prevPrice = price
+			label.append(priceLabel)
+		return label
+

@@ -1,12 +1,13 @@
-from Cerebro import Cerebro 
+from viki.cerebro import Cerebro 
 import datetime
 
-s = datetime.datetime(2000,5,20)
-e = datetime.datetime(2016,5,30)
+s = datetime.datetime(2017,5,3)
+e = datetime.datetime(2017,5,10)
 
 
 crb = Cerebro()
 
-crb.setInstruments(["070960.KS", "000660.KS", "005930.KS"])
+# crb.setInstruments(["070960.KS", "000660.KS", "005930.KS"])
 
-print crb.makeDataSet(s,e)
+ss = crb.makeBaseDataSet(["070960.KS", "000660.KS", "005930.KS"], s,e)
+print ss
