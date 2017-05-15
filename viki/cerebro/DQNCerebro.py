@@ -29,7 +29,7 @@ class DQNCerebro(Cerebro):
 		model.add(Flatten())
 		model.add(Dense(512))
 		model.add(Activation('relu'))
-		model.add(Dense(num_of_instruments + 1))
+		model.add(Dense(num_of_instruments + 1,activation='sigmoid',kernel_initializer='normal'))
 		adam = Adam(lr=LEARNING_RATE)
 		model.compile(loss='mse',optimizer=adam, metrics=['accuracy'])
 		try:

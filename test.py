@@ -11,6 +11,10 @@ from alphaman.feed import DailyInstrumentData, DailyFeed, Feed
 from viki.utils import strCode
 from viki.core.VikiStrategy import VikiStrategy
 import pickle
+import numpy
+# fix random seed for reproducibility
+seed = 7
+numpy.random.seed(seed)
 
 requests.packages.urllib3.disable_warnings()
 

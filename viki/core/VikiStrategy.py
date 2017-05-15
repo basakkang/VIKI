@@ -25,10 +25,12 @@ class VikiStrategy(BaseStrategy):
 
 	def handleData(self):
 		probList = []
+		sum_prob = 0;
 		for idx, instrument in enumerate(self.__instruments):
 			probability = self.props[self.cnt][idx]
+			sum_prob += probability
 			probList.append((instrument, probability))
 		probList.sort(key=lambda tup: tup[1])
 		for prob in probList:		
-			self.orderTarget(prob[0], prob[1])
+			self.orderTarget(prob[0], prob[1]/sum_prob)
 		self.cnt += 1

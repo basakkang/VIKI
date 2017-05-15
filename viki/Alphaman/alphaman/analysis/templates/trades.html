@@ -14,7 +14,6 @@
             var d3 = Plotly.d3;
             var gd3 = d3.select('#instrument_graph_{{ loop.index }}');
             var gd = gd3.node();
-
             var instrument = {{instrument|tojson|safe}};
             var bar = new Object();
             var buy = new Object();
@@ -27,32 +26,26 @@
             bar.line = {
                 color: '#000000'
             }
-
             buy.x = instrument.buy.x;
-            buy.y = instrument.buy.volume;
+            buy.y = instrument.buy.price;
             buy.name = 'Buy';
-            buy.type = 'bar';
-            buy.yaxis = 'y2';
-            /*buy.mode = 'markers';
+            buy.mode = 'markers';
             buy.marker = {
                 symbol: 'triangle-up', // triangle up
                 color: '#FF0000',
                 sizemode: 'area',
                 size: 10
-            };*/
-
+            };
             sell.x = instrument.sell.x;
-            sell.y = instrument.sell.volume;
+            sell.y = instrument.sell.price;
             sell.name = 'Sell';
-            sell.type = 'bar';
-            sell.yaxis = 'y2';
-            /*sell.mode = 'markers';
+            sell.mode = 'markers';
             sell.marker = {
                 symbol: 'triangle-down', // triangle down
                 color: '#0000FF',
                 sizemode: 'area',
                 size: 10
-            };*/
+            };
             
 
             var layout = {
