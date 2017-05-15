@@ -33,10 +33,9 @@ class DQNCerebro(Cerebro):
 		model.add(Dense(num_of_instruments + 1))
 		adam = Adam(lr=LEARNING_RATE)
 		model.compile(loss='mse',optimizer=adam, metrics=['accuracy'])
-		return model
+		self.__model = model
 
 	def train(self, train_num):
-		self.__model = self.buildModel()
 		try:
 			self.__model.model.load_weights('DQNCerebro.h5')
 		except:
