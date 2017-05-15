@@ -42,7 +42,7 @@ class DQNCerebro(Cerebro):
 	def train(self, train_num):
 		cnt = 0
 		while cnt < train_num:
-			images, labels, _ = self.makeData(self._input_days, self._inst_num, self._learning_start_date, self._learning_end_date)
+			images, labels, _, _, _, _ = self.makeData(self._input_days, self._inst_num, self._learning_start_date, self._learning_end_date)
 			self.__model.fit(images, labels, epochs=10, batch_size=1, verbose=2)
 			self.__model.save_weights("DQNCerebro.h5", overwrite=True)
 			cnt += 1
