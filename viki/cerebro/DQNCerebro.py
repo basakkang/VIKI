@@ -33,13 +33,14 @@ class DQNCerebro(Cerebro):
 		model.add(Dense(num_of_instruments + 1))
 		adam = Adam(lr=LEARNING_RATE)
 		model.compile(loss='mse',optimizer=adam, metrics=['accuracy'])
+		try:
+			model.load_weights('DQNCerebro.h5')
+		except:
+			pass
 		self.__model = model
 
 	def train(self, train_num):
-		try:
-			self.__model.model.load_weights('DQNCerebro.h5')
-		except:
-			pass
+		
 		cnt = 0
 		while cnt < train_num:
 			images, labels, _ = self.makeData(self._input_days, self._inst_num, self._learning_start_date, self._learning_end_date)
