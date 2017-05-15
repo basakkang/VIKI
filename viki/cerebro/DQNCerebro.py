@@ -35,17 +35,27 @@ class DQNCerebro(Cerebro):
 		model.compile(loss='mse',optimizer=adam, metrics=['accuracy'])
 		return model
 
-	def train(self):
-		# self.__model = self.buildModel()
-		while True:
-			images, labels = self.makeTrainData(self._input_days, self._inst_num, self._learning_start_date, self._learning_end_date)
-		# self.__model.fit(images, labels, epochs=10, batch_size=1, verbose=2)
-		# self.__model.save_weights("DQNCerebro.h5", overwrite=True)
+	def train(self, train_num):
+		self.__model = self.buildModel()
+		try:
+			self.__model.model.load_weights('DQNCerebro.h5')
+		except:
+			pass
+		cnt = 0
+		while cnt < train_num:
+			images, labels, _ = self.makeData(self._input_days, self._inst_num, self._learning_start_date, self._learning_end_date)
+			self.__model.fit(images, labels, epochs=10, batch_size=1, verbose=2)
+			self.__model.save_weights("DQNCerebro.h5", overwrite=True)
+			cnt += 1
+
+	def getTestingResult(self):
+		images, labels, codes = self.makeData(self._input_days, self._inst_num, self._learning_start_date, self._learning_end_date)
+		return self.__model.predict(images), codes
 
 	def setInstNum(self, num):
 		self._inst_num = num
 
-	def makeTrainData(self, day, inst_num, start_date, end_date):
+	def makeData(self, day, inst_num, start_date, end_date):
 
 		codes = self.getRandInstruments(inst_num)
 		try: 
@@ -53,7 +63,7 @@ class DQNCerebro(Cerebro):
 		# ["000660", "005190"]
 			images, prices = self.generateImages(day, codes, start_date, end_date)
 			labels = self.generateLabelWithPrices(prices)
-			return images[1::], labels
+			return images[1::], labels, codes
 		except :
 			return self.makeTrainData(day, inst_num, start_date, end_date)
 

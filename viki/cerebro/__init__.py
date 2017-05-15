@@ -78,5 +78,5 @@ class Cerebro:
 			self.__model.fit(x_train, y_train, epochs=10, batch_size=1, verbose=2)
 
 	def getTestingResult(self):
-		return self.__model.predict(x_test)
+		# return self.__model.predict(x_test)
 	
