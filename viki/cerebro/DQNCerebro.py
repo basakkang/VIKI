@@ -3,7 +3,7 @@ from keras.models import Sequential
 from keras.layers.convolutional import Conv2D
 from keras.optimizers import SGD , Adam
 from keras.layers.core import Dense, Dropout, Activation, Flatten
-from viki.utils import getRandCompany, getCloseStartDate, strCode
+from viki.utils import getRandCompany, getCloseStartDate, strCode, ReMakeError
 
 import pandas_datareader.data as web
 import h5py
@@ -36,19 +36,26 @@ class DQNCerebro(Cerebro):
 		return model
 
 	def train(self):
-		self.__model = self.buildModel()
-		images, labels = self.makeTrainData(self._input_days, self._inst_num, self._learning_start_date, self._learning_end_date)
-		self.__model.fit(images, labels, epochs=10, batch_size=1, verbose=2)
-		self.__model.save_weights("DQNCerebro.h5", overwrite=True)
+		# self.__model = self.buildModel()
+		while True:
+			images, labels = self.makeTrainData(self._input_days, self._inst_num, self._learning_start_date, self._learning_end_date)
+		# self.__model.fit(images, labels, epochs=10, batch_size=1, verbose=2)
+		# self.__model.save_weights("DQNCerebro.h5", overwrite=True)
 
 	def setInstNum(self, num):
 		self._inst_num = num
 
 	def makeTrainData(self, day, inst_num, start_date, end_date):
+
 		codes = self.getRandInstruments(inst_num)
-		images, prices = self.generateImages(day, codes, start_date, end_date)
-		labels = self.generateLabelWithPrices(prices)
-		return images[1::], labels
+		try: 
+			# codes = [u'11790', u'34310', u'152330', u'10050', u'2200', u'5620', u'16800', u'3470', u'6200', u'93230', u'3490', u'11160', u'12630', u'32830', u'4440', u'143210', u'4690', u'660', u'10120', u'21960']
+		# ["000660", "005190"]
+			images, prices = self.generateImages(day, codes, start_date, end_date)
+			labels = self.generateLabelWithPrices(prices)
+			return images[1::], labels
+		except :
+			return self.makeTrainData(day, inst_num, start_date, end_date)
 
 	def getRandInstruments(self, inst_num):
 		return getRandCompany(inst_num)
@@ -95,9 +102,28 @@ class DQNCerebro(Cerebro):
 
 	def generateLabelWithPrices(self, prices):
 		label = []
-		prevPrice = prices[0]
-		for price in prices[1::]:
+		# try:
+		# 	# for item in prices :
+		# 	# 	print item
+		# 	# 	print item.index(0)
+		# 	# 	print "hi"
+		# except:
+		# 	pass
+		if len(prices) == 0:
+			raise ReMakeError("len == 0")
+		# prevIdx = prices[0]
+		for idx, price in enumerate(prices[1::]):
 			priceLabel = [0] * (len(prices[0]) + 1)
+			# if prevPrice[i] == 
+			prevPrice =  prices[idx]
+			try :
+				idx2 = prevPrice.index(0)
+				print idx
+				print idx2
+				print prevPrice[idx2]
+				print price[idx2]
+			except:
+				pass
 			diffPrices = [(price[i] - prevPrice[i])/prevPrice[i] for i in range(len(price))]
 			max_val = max(diffPrices)
 			if max_val > 0 :
@@ -105,7 +131,6 @@ class DQNCerebro(Cerebro):
 				priceLabel[max_idx] = 1
 			else:
 				priceLabel[-1] = 1
-			prevPrice = price
 			label.append(priceLabel)
 		return label
 

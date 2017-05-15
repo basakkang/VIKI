@@ -23,11 +23,18 @@ def getRandCompany(num):
 def getCloseStartDate(codes):
 	conn = sqlite3.connect(db_path)
 	cur = conn.cursor()
-	query = "SELECT start_date FROM company2 where name in ("
+	query = "SELECT start_date,name FROM company2 where name in ("
 	for code in codes[:-1]:
 		query += str(code) + ","
 	query += str(codes[-1])
 	query += ") ORDER BY start_date"
 	cur.execute(query)
 	rows = cur.fetchall()
+	print rows
 	return datetime.datetime.strptime(rows[-1][0], '%Y-%m-%d %H:%M:%S')
+
+class ReMakeError(Exception):
+	 def __init__(self, value):
+		 self.value = value
+	 def __str__(self):
+		 return repr(self.value)

@@ -44,14 +44,14 @@ class Cerebro:
 			# df = df[df.Volume != 0]
 			# df.columns = ['V'+str(idx), 'O'+str(idx), 'H'+str(idx), 'L'+str(idx), 'C'+str(idx)]
 			# make data serialized
+			# print df[df['Close'] == 0]
 			df_total = (df, pd.concat([df_total, df], axis=1))[df_total is not None]
-
 		# make NaN 0
 		df_total = df_total.fillna(0)
 		df_volume = df_total['Volume']
 		idx_list = []
 		for idx, item in enumerate(df_volume.values.tolist()):
-			v_total = reduce(lambda x, y: x+y, item)
+			v_total = reduce(lambda x, y: x*y, item)
 			if v_total == 0:
 				idx_list.append(idx)
  		df_total = df_total.drop(df_total.index[idx_list])
@@ -69,6 +69,7 @@ class Cerebro:
 					newItem.append([])
 				newItem[-1].append(val)
 			new_scaled_x.append(newItem)
+		
 		return new_scaled_x, df_total['Close'].values.tolist()
 
 	def train(self):
