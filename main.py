@@ -23,7 +23,7 @@ start_t = datetime.datetime(2016, 7, 1)
 end_t = datetime.datetime(2017, 5, 14)
 cerebro.setTestingDate(start_t, end_t)
 cerebro.buildModel()
-# cerebro.train(10)
+cerebro.train(10)
 labels, codes, s_date, end_date, date_list = cerebro.getTestingResult()
 
 feed = Feed(s_date, end_date)
