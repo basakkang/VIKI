@@ -4,7 +4,6 @@ from keras.layers.convolutional import Conv2D
 from keras.optimizers import SGD , Adam
 from keras.layers.core import Dense, Dropout, Activation, Flatten
 from viki.utils import getRandCompany, getCloseStartDate, strCode, ReMakeError
-
 import pandas_datareader.data as web
 import h5py
 
@@ -36,11 +35,11 @@ class DQNCerebro(Cerebro):
 		try:
 			model.load_weights('DQNCerebro.h5')
 		except:
+			print "load failed"
 			pass
 		self.__model = model
 
 	def train(self, train_num):
-		
 		cnt = 0
 		while cnt < train_num:
 			images, labels, _ = self.makeData(self._input_days, self._inst_num, self._learning_start_date, self._learning_end_date)
@@ -49,23 +48,27 @@ class DQNCerebro(Cerebro):
 			cnt += 1
 
 	def getTestingResult(self):
-		images, labels, codes = self.makeData(self._input_days, self._inst_num, self._learning_start_date, self._learning_end_date)
-		return self.__model.predict(images), codes
+		images, labels, codes, s_date, end_date, date_list = self.makeData(self._input_days, self._inst_num, self._testing_start_date, self._testing_end_date)
+		return (self.__model.predict(images), codes, s_date, end_date, date_list)
 
 	def setInstNum(self, num):
 		self._inst_num = num
 
 	def makeData(self, day, inst_num, start_date, end_date):
-
 		codes = self.getRandInstruments(inst_num)
 		try: 
-			# codes = [u'11790', u'34310', u'152330', u'10050', u'2200', u'5620', u'16800', u'3470', u'6200', u'93230', u'3490', u'11160', u'12630', u'32830', u'4440', u'143210', u'4690', u'660', u'10120', u'21960']
+		 # codes = [u'11790', u'34310', u'152330', u'10050', u'2200', u'5620', u'16800', u'3470', u'6200', u'93230', u'3490', u'11160', u'12630', u'32830', u'4440', u'143210', u'4690', u'660', u'10120', u'21960']
 		# ["000660", "005190"]
-			images, prices = self.generateImages(day, codes, start_date, end_date)
+			close_start_date = self.getCloseStartInstruments(codes)
+			s_date = (close_start_date, start_date)[start_date > close_start_date]
+			images, prices, date_list = self.generateImages(day, codes, s_date, end_date)
 			labels = self.generateLabelWithPrices(prices)
-			return images[1::], labels, codes
+			print codes
+			print s_date
+			print end_date
+			return images[:-1], labels, codes, s_date, end_date, date_list
 		except :
-			return self.makeTrainData(day, inst_num, start_date, end_date)
+		 	return self.makeData(day, inst_num, start_date, end_date)
 
 	def getRandInstruments(self, inst_num):
 		return getRandCompany(inst_num)
@@ -74,20 +77,15 @@ class DQNCerebro(Cerebro):
 		return getCloseStartDate(codes)
 
 	def getRandPriceDatas(self, codes, start_date, end_date):
-		print codes
-		close_start_date = self.getCloseStartInstruments(codes)
-		s_date = (close_start_date, start_date)[start_date > close_start_date]
-		print s_date
-		print end_date
-		baseDataset, prices = self.makeBaseDataSet(map(lambda x:strCode(x)+".KS", codes), s_date, end_date)
-		return baseDataset, prices
+		baseDataset, prices, date_list = self.makeBaseDataSet(map(lambda x:strCode(x)+".KS", codes), start_date, end_date)
+		return baseDataset, prices, date_list
 
 	def generateImages(self, days, codes, start_date, end_date):
 		images = []
-		randDatas, prices = self.getRandPriceDatas(codes, start_date, end_date)
+		randDatas, prices, date_list = self.getRandPriceDatas(codes, start_date, end_date)
 		for i in range(len(randDatas) - days):
 			images.append(randDatas[i: i + days])
-		return images, prices[:-days]
+		return images, prices[days:], date_list[days+1:]
 
 	# def generateLabelWithImage(self, images):
 	# 	label = []
@@ -128,10 +126,6 @@ class DQNCerebro(Cerebro):
 			prevPrice =  prices[idx]
 			try :
 				idx2 = prevPrice.index(0)
-				print idx
-				print idx2
-				print prevPrice[idx2]
-				print price[idx2]
 			except:
 				pass
 			diffPrices = [(price[i] - prevPrice[i])/prevPrice[i] for i in range(len(price))]

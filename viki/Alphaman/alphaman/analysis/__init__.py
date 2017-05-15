@@ -107,7 +107,7 @@ class BaseAnalysis:
 	def getReturnRate(self, records):
 		assetDelta 	= records[-1].getAsset() - records[0].getAsset()
 		dayDelta	= records[-1].getDay() - records[0].getDay()
-		num_years = int(dayDelta.days / 365.25)
+		num_years = (float(dayDelta.days) / 365.25)
 		earning_rate = (assetDelta * 100.000) / float(records[0].getAsset()) 
 		year_earning_rate = earning_rate ** (1/float(num_years))
 		return year_earning_rate

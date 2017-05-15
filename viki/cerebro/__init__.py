@@ -70,7 +70,7 @@ class Cerebro:
 				newItem[-1].append(val)
 			new_scaled_x.append(newItem)
 		
-		return new_scaled_x, df_total['Close'].values.tolist()
+		return new_scaled_x, df_total['Close'].values.tolist(), df_total.index.tolist()
 
 	def train(self):
 		self.__model = self.makeModel()

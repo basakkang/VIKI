@@ -190,8 +190,9 @@ class Feed():
 				extra_data[column] = int(data[column])
 			# make is_tradable
 			is_tradable = True
-			if data['Volume'] == 0:
-				is_tradable = False
+			if 'Volume' in bar_columns:
+				if data['Volume'] == 0:
+					is_tradable = False
 			# create daily_instrument_data
 			daily_instrument_data = DailyInstrumentData(instrument, bar_data, extra_data, is_tradable)
 			# add daily_instrument_data to daily_feed

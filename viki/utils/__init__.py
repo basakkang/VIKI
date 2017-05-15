@@ -30,7 +30,6 @@ def getCloseStartDate(codes):
 	query += ") ORDER BY start_date"
 	cur.execute(query)
 	rows = cur.fetchall()
-	print rows
 	return datetime.datetime.strptime(rows[-1][0], '%Y-%m-%d %H:%M:%S')
 
 class ReMakeError(Exception):

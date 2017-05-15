@@ -33,8 +33,8 @@ class BaseStrategy:
 		self.__signals[key] = signal
 		signal.setStrategy(self)
 
-	def getSignal(self, key):
-		return self.__signals[key].getSignal()
+	def getSignal(self, key, args):
+		return self.__signals[key].getSignal(args)
 
 	def handleData(self):
 		raise NotImplementedError()
